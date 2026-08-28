@@ -69,6 +69,41 @@ test("extracts complete relative chapter paths from hrefs", () => {
   );
 });
 
+test("accepts shortened MangaHere slugs for restored Netsky 0.8 title ids", () => {
+  const aliases = [
+    {
+      legacy:
+        "a_sword_master_childhood_friend_power_harassed_me_harshly_so_i_broke_off_our_relationship_and_make_a",
+      current: "a_sword_master_childhood_friend_power_harassed_me_harshly",
+      chapter: "c029.3",
+    },
+    {
+      legacy:
+        "i_m_a_middle_aged_man_who_got_my_adventurer_license_revoked_but_i_m_enjoying_a_carefree_lifestyle_be",
+      current: "i_m_a_middle_aged_man_who_got_my_adventurer_license_revoked",
+      chapter: "c058",
+    },
+  ];
+
+  for (const alias of aliases) {
+    assert.equal(
+      chapterIdFromHref(alias.legacy, `/manga/${alias.current}/${alias.chapter}/1.html`),
+      alias.chapter,
+    );
+  }
+});
+
+test("keeps direct chapter identifiers strict across MangaHere aliases", () => {
+  assert.throws(
+    () =>
+      normalizeChapterId(
+        "a_sword_master_childhood_friend_power_harassed_me_harshly_so_i_broke_off_our_relationship_and_make_a",
+        "manga/a_sword_master_childhood_friend_power_harassed_me_harshly/c029.3",
+      ),
+    InvalidMangaHereIdError,
+  );
+});
+
 test("rejects identifiers from foreign hosts", () => {
   assert.throws(
     () => normalizeMangaId("https://example.com/manga/class_no_bocchi"),
@@ -79,6 +114,14 @@ test("rejects identifiers from foreign hosts", () => {
 test("rejects chapter paths belonging to another title", () => {
   assert.throws(
     () => normalizeChapterId("class_no_bocchi", "manga/another_title/c001"),
+    InvalidMangaHereIdError,
+  );
+  assert.throws(
+    () => chapterIdFromHref("class_no_bocchi", "/manga/another_title/c001/1.html"),
+    InvalidMangaHereIdError,
+  );
+  assert.throws(
+    () => chapterIdFromHref("class_no_bocchi", "/manga/class_no_bocchiness/c001/1.html"),
     InvalidMangaHereIdError,
   );
 });

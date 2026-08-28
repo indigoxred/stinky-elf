@@ -69,6 +69,22 @@ test("preserves complete legacy-relative chapter paths", () => {
   assert.equal(chapters[0]?.publishDate.getFullYear(), 2026);
 });
 
+test("parses current chapter links for a restored Netsky 0.8 title alias", () => {
+  const current = "a_sword_master_childhood_friend_power_harassed_me_harshly";
+  const legacy = `${current}_so_i_broke_off_our_relationship_and_make_a`;
+  const html = CHAPTER_LIST_HTML.replaceAll("class_no_bocchi", current).replace(
+    "v01/c025",
+    "c029.3",
+  );
+
+  const chapters = parseChapters(html, legacy);
+
+  assert.deepEqual(
+    chapters.map((chapter) => chapter.chapterId),
+    ["c029.3", "c024"],
+  );
+});
+
 test("detects another listing page", () => {
   assert.deepEqual(parsePageMetadata(SEARCH_HTML), { hasNextPage: true });
   assert.deepEqual(parsePageMetadata(DIRECTORY_HTML), { hasNextPage: false });

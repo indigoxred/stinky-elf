@@ -78,7 +78,15 @@ export function normalizeMangaId(input: string): string {
   return segments[0];
 }
 
-export function normalizeChapterId(mangaId: string, input: string): string {
+function isCompatibleMangaAlias(storedTitle: string, embeddedTitle: string): boolean {
+  return storedTitle.startsWith(`${embeddedTitle}_`) || embeddedTitle.startsWith(`${storedTitle}_`);
+}
+
+function normalizeChapterIdInternal(
+  mangaId: string,
+  input: string,
+  allowCompatibleAlias: boolean,
+): string {
   const title = normalizeMangaId(mangaId);
   const segments = normalizedPathSegments(input);
 
@@ -87,7 +95,10 @@ export function normalizeChapterId(mangaId: string, input: string): string {
   if (segments[0]?.toLowerCase() === "manga") {
     segments.shift();
     const embeddedTitle = segments.shift();
-    if (embeddedTitle !== title) {
+    if (
+      embeddedTitle !== title &&
+      (!allowCompatibleAlias || !embeddedTitle || !isCompatibleMangaAlias(title, embeddedTitle))
+    ) {
       throw new InvalidMangaHereIdError("Chapter belongs to a different title");
     }
   } else if (segments.length > 1 && segments[0] === title) {
@@ -98,6 +109,10 @@ export function normalizeChapterId(mangaId: string, input: string): string {
     throw new InvalidMangaHereIdError("Chapter identifier has no relative path");
   }
   return segments.join("/");
+}
+
+export function normalizeChapterId(mangaId: string, input: string): string {
+  return normalizeChapterIdInternal(mangaId, input, false);
 }
 
 function encodePath(path: string): string {
@@ -118,5 +133,5 @@ export function chapterUrl(mangaId: string, chapterId: string): string {
 }
 
 export function chapterIdFromHref(mangaId: string, href: string): string {
-  return normalizeChapterId(mangaId, href);
+  return normalizeChapterIdInternal(mangaId, href, true);
 }

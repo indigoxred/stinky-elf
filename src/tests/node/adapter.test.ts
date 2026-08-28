@@ -48,7 +48,7 @@ async function withoutConsoleInfo<T>(operation: () => Promise<T>): Promise<T> {
 test("publishes the exact MangaHere source identity for restored libraries", () => {
   assert.equal(MangaHereConfig, NamedMangaHereConfig);
   assert.equal(MangaHereConfig.name, "MangaHere");
-  assert.equal(MangaHereConfig.version, "1.0.0-alpha.5");
+  assert.equal(MangaHereConfig.version, "1.0.0-alpha.6");
   assert.equal(MangaHereConfig.contentRating, ContentRating.MATURE);
   assert.deepEqual(MangaHereConfig.developers, [
     { name: "indigoxred", github: "https://github.com/indigoxred" },
