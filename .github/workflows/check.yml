@@ -1,0 +1,35 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+
+      - name: Check conformance
+        run: pnpm run conformance
+
+      - name: Run behavior tests
+        run: pnpm test
+
+      - name: Run Paperback sandbox test
+        run: pnpm run test:paperback
+
+      - name: Build repository bundle
+        run: pnpm run bundle

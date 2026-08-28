@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+
+      - name: Check conformance
+        run: pnpm run conformance
+
+      - name: Run behavior tests
+        run: pnpm test
+
+      - name: Run Paperback sandbox test
+        run: pnpm run test:paperback
+
+      - name: Build repository bundle
+        run: pnpm run bundle
+
+      - name: Publish compiled artifacts
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: bundles
+          destination_dir: 0.9/stable

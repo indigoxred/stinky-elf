@@ -58,13 +58,10 @@ test("writes the Paperback 0.9 test result schema", async () => {
     (records.tests as { sample?: { status?: unknown } } | undefined)?.sample?.status,
     "pass",
   );
-  assert.deepEqual(
-    records.summary,
-    {
-      passed: 1,
-      failed: 0,
-      total: 1,
-      duration: (records.summary as { duration: number }).duration,
-    },
-  );
+  assert.deepEqual(records.summary, {
+    passed: 1,
+    failed: 0,
+    total: 1,
+    duration: (records.summary as { duration: number }).duration,
+  });
 });
