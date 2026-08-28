@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-floating-promises -- node:test registers top-level tests. */
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -34,10 +35,7 @@ test("extracts ordered HTTPS bulk image URLs", () => {
 });
 
 test("extracts one resolved page URL from pix and pvalue", () => {
-  assert.equal(
-    extractResolvedImageUrl(PAGE_PACKED_SCRIPT),
-    "https://img.example/003.jpg",
-  );
+  assert.equal(extractResolvedImageUrl(PAGE_PACKED_SCRIPT), "https://img.example/003.jpg");
 });
 
 test("extracts the secret-key expression without evaluating it", () => {

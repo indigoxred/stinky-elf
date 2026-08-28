@@ -1,14 +1,9 @@
+/* oxlint-disable typescript/no-floating-promises -- node:test registers top-level tests. */
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type {
-  PageFetchResult,
-  TraditionalReaderConfig,
-} from "../../MangaHere/models.js";
-import {
-  PageResolutionError,
-  resolveTraditionalPages,
-} from "../../MangaHere/resolver.js";
+import type { PageFetchResult, TraditionalReaderConfig } from "../../MangaHere/models.js";
+import { PageResolutionError, resolveTraditionalPages } from "../../MangaHere/resolver.js";
 
 const CONFIG: TraditionalReaderConfig = {
   mode: "traditional",
@@ -75,9 +70,7 @@ test("retries an empty response with an empty key", async () => {
     async (_page, key): Promise<PageFetchResult> => {
       keys.push(key);
       attempts += 1;
-      return attempts === 1
-        ? { status: 200, body: "" }
-        : { status: 200, body: pageBody(1) };
+      return attempts === 1 ? { status: 200, body: "" } : { status: 200, body: pageBody(1) };
     },
     noSleep,
   );
@@ -111,7 +104,10 @@ test("reduces future request batches to one after throttling", async () => {
     noSleep,
   );
 
-  assert.deepEqual(pages, [1, 2, 3, 4, 5].map((page) => `https://img.example/${page}.jpg`));
+  assert.deepEqual(
+    pages,
+    [1, 2, 3, 4, 5].map((page) => `https://img.example/${page}.jpg`),
+  );
   assert.equal(pageTwoAttempts, 1);
   assert.equal(maxActiveAfterThrottle, 1);
 });
@@ -127,7 +123,6 @@ test("rejects the whole chapter when one page remains unresolved", async () => {
   await assert.rejects(
     promise,
     (error: unknown) =>
-      error instanceof PageResolutionError &&
-      error.message === "Unresolved MangaHere pages: 2",
+      error instanceof PageResolutionError && error.message === "Unresolved MangaHere pages: 2",
   );
 });

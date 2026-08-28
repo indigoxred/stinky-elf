@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-floating-promises -- node:test registers top-level tests. */
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -94,7 +95,6 @@ test("parses traditional reader configuration", () => {
 test("rejects traditional readers without a chapter id", () => {
   assert.throws(
     () => parseReader(TRADITIONAL_READER_HTML.replace("chapterid", "chapter"), CHAPTER_URL),
-    (error: unknown) =>
-      error instanceof MangaHereParseError && /chapter id/i.test(error.message),
+    (error: unknown) => error instanceof MangaHereParseError && /chapter id/i.test(error.message),
   );
 });

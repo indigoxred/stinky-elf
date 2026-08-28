@@ -16,8 +16,7 @@ function unescapePackedPayload(payload: string): string {
 function encodeToken(value: number, radix: number): string {
   const prefix = value < radix ? "" : encodeToken(Math.floor(value / radix), radix);
   const remainder = value % radix;
-  const character =
-    remainder > 35 ? String.fromCharCode(remainder + 29) : remainder.toString(36);
+  const character = remainder > 35 ? String.fromCharCode(remainder + 29) : remainder.toString(36);
   return prefix + character;
 }
 

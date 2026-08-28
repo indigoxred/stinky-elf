@@ -2,12 +2,7 @@ import * as cheerio from "cheerio";
 
 import { BASE_URL } from "./constants.js";
 import { chapterIdFromHref, normalizeMangaId } from "./identifiers.js";
-import type {
-  ParsedChapter,
-  ParsedListing,
-  ParsedManga,
-  ReaderConfig,
-} from "./models.js";
+import type { ParsedChapter, ParsedListing, ParsedManga, ReaderConfig } from "./models.js";
 import { extractBulkImageUrls, extractKeyExpression } from "./packed.js";
 
 const PACKED_MARKER = "function(p,a,c,k,e,d)";
@@ -20,7 +15,10 @@ function absoluteUrl(value: string | undefined): string {
   if (!value?.trim()) return "";
 
   try {
-    const parsed = new URL(value.trim().startsWith("//") ? `https:${value.trim()}` : value, BASE_URL);
+    const parsed = new URL(
+      value.trim().startsWith("//") ? `https:${value.trim()}` : value,
+      BASE_URL,
+    );
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
     return parsed.href;
   } catch {
@@ -33,13 +31,9 @@ function optionalText(value: string): string | undefined {
   return normalized || undefined;
 }
 
-export function parseListings(
-  html: string,
-  mode: "search" | "directory",
-): ParsedListing[] {
+export function parseListings(html: string, mode: "search" | "directory"): ParsedListing[] {
   const $ = cheerio.load(html);
-  const itemSelector =
-    mode === "search" ? ".manga-list-4-list > li" : ".manga-list-1-list li";
+  const itemSelector = mode === "search" ? ".manga-list-4-list > li" : ".manga-list-1-list li";
 
   return $(itemSelector)
     .toArray()
@@ -55,11 +49,7 @@ export function parseListings(
 
       const subtitle = optionalText(
         item
-          .find(
-            mode === "search"
-              ? ".manga-list-4-item-tip"
-              : ".manga-list-1-item-subtitle",
-          )
+          .find(mode === "search" ? ".manga-list-4-item-tip" : ".manga-list-1-item-subtitle")
           .first()
           .text(),
       );
@@ -85,8 +75,7 @@ export function parseMangaDetails(html: string, mangaId: string): ParsedManga {
   const fallbackTitle = normalizeMangaId(mangaId).replace(/[_-]+/g, " ");
   const author = optionalText($(".detail-info-right-say > a").first().text());
   const parsed: ParsedManga = {
-    title:
-      optionalText($(".detail-info-right-title-font").first().text()) ?? fallbackTitle,
+    title: optionalText($(".detail-info-right-title-font").first().text()) ?? fallbackTitle,
     thumbnailUrl: absoluteUrl($("img.detail-info-cover-img").first().attr("src")),
     synopsis: optionalText($(".fullcontent").first().text()) ?? "",
     status: normalizeStatus($(".detail-info-right-title-tip").first().text()),
@@ -122,25 +111,23 @@ export function parseChapters(html: string, mangaId: string): ParsedChapter[] {
   const primary = $("ul.detail-main-list > li");
   const items = primary.length > 0 ? primary : $("#chapterlist ul li");
 
-  return items
-    .toArray()
-    .flatMap((node): ParsedChapter[] => {
-      const item = $(node);
-      const link = item.find("a").first();
-      const href = link.attr("href");
-      if (!href) return [];
+  return items.toArray().flatMap((node): ParsedChapter[] => {
+    const item = $(node);
+    const link = item.find("a").first();
+    const href = link.attr("href");
+    if (!href) return [];
 
-      const chapterId = chapterIdFromHref(mangaId, href);
-      return [
-        {
-          chapterId,
-          title: optionalText(item.find("p.title3").first().text()) ?? chapterId,
-          chapNum: numberFromChapterPath(chapterId, "c"),
-          volume: numberFromChapterPath(chapterId, "v"),
-          publishDate: parsePublishDate(item.find("p.title2").first().text()),
-        },
-      ];
-    });
+    const chapterId = chapterIdFromHref(mangaId, href);
+    return [
+      {
+        chapterId,
+        title: optionalText(item.find("p.title3").first().text()) ?? chapterId,
+        chapNum: numberFromChapterPath(chapterId, "c"),
+        volume: numberFromChapterPath(chapterId, "v"),
+        publishDate: parsePublishDate(item.find("p.title2").first().text()),
+      },
+    ];
+  });
 }
 
 export function parsePageMetadata(html: string): { hasNextPage: boolean } {

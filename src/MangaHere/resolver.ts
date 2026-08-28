@@ -1,8 +1,4 @@
-import type {
-  PageFetchResult,
-  ResolverOptions,
-  TraditionalReaderConfig,
-} from "./models.js";
+import type { PageFetchResult, ResolverOptions, TraditionalReaderConfig } from "./models.js";
 import { extractResolvedImageUrl } from "./packed.js";
 
 const THROTTLE_STATUSES = new Set([403, 429]);
@@ -88,7 +84,7 @@ export async function resolveTraditionalPages(
   const pageCount = positiveInteger(config.pageCount, 0);
   if (pageCount === 0) throw new PageResolutionError([]);
 
-  const pages = new Array<string | undefined>(pageCount).fill(undefined);
+  const pages = Array.from<string | undefined>({ length: pageCount }).fill(undefined);
   const maxAttempts = positiveInteger(options.maxAttempts, 3);
   let width = positiveInteger(options.concurrency, 3);
   let cursor = 1;
@@ -99,9 +95,7 @@ export async function resolveTraditionalPages(
       (_, index) => cursor + index,
     );
     const settled = await Promise.allSettled(
-      batch.map((page) =>
-        resolvePage(page, config.secretKey ?? "", fetchPage, sleep, maxAttempts),
-      ),
+      batch.map((page) => resolvePage(page, config.secretKey ?? "", fetchPage, sleep, maxAttempts)),
     );
     let batchWasThrottled = false;
 

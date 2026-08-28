@@ -51,8 +51,7 @@ export const CHAPTER_LIST_HTML = `
   </ul>
 </body></html>`;
 
-export const CHAPTER_URL =
-  "https://www.mangahere.cc/manga/class_no_bocchi/c025/1.html";
+export const CHAPTER_URL = "https://www.mangahere.cc/manga/class_no_bocchi/c025/1.html";
 
 export const BULK_READER_HTML = `
 <html><body>

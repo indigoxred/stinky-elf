@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-floating-promises -- node:test registers top-level tests. */
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -20,9 +21,7 @@ test("normalizes Paperback 0.9 title paths", () => {
 
 test("normalizes MangaHere title URLs", () => {
   assert.equal(
-    normalizeMangaId(
-      "https://www.mangahere.cc/manga/class_no_bocchi/?source=library#details",
-    ),
+    normalizeMangaId("https://www.mangahere.cc/manga/class_no_bocchi/?source=library#details"),
     "class_no_bocchi",
   );
 });
@@ -37,10 +36,7 @@ test("preserves volume-qualified legacy chapter ids", () => {
 
 test("reduces title-prefixed chapter paths to legacy-relative ids", () => {
   assert.equal(
-    normalizeChapterId(
-      "class_no_bocchi",
-      "manga/class_no_bocchi/v01/c025/1.html",
-    ),
+    normalizeChapterId("class_no_bocchi", "manga/class_no_bocchi/v01/c025/1.html"),
     "v01/c025",
   );
 });
@@ -68,10 +64,7 @@ test("constructs canonical MangaHere URLs", () => {
 
 test("extracts complete relative chapter paths from hrefs", () => {
   assert.equal(
-    chapterIdFromHref(
-      "class_no_bocchi",
-      "/manga/class_no_bocchi/v01/c025/",
-    ),
+    chapterIdFromHref("class_no_bocchi", "/manga/class_no_bocchi/v01/c025/"),
     "v01/c025",
   );
 });

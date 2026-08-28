@@ -2,15 +2,12 @@
   "name": "mangahere-paperback",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "packageManager": "pnpm@11.19.0",
   "license": "UNLICENSED",
-  "repositoryName": "indigoxred MangaHere",
-  "repositoryDescription": "Private-source MangaHere extension repository for Paperback 0.9",
+  "type": "module",
   "scripts": {
     "tsc": "tsc",
-    "format": "oxfmt .",
-    "format:check": "oxfmt --check .",
+    "format": "oxfmt src package.json tsconfig.json tsconfig.test.json pnpm-workspace.yaml",
+    "format:check": "oxfmt --check src package.json tsconfig.json tsconfig.test.json pnpm-workspace.yaml",
     "lint": "oxlint --type-aware --fix",
     "lint:check": "oxlint --type-aware --deny-warnings",
     "conformance": "pnpm run tsc && pnpm run lint:check && pnpm run format:check",
@@ -19,9 +16,6 @@
     "bundle": "paperback-cli bundle",
     "serve": "paperback-cli serve",
     "dev": "paperback-cli serve --watch"
-  },
-  "engines": {
-    "node": ">=24"
   },
   "dependencies": {
     "cheerio": "1.2.0"
@@ -36,5 +30,11 @@
     "oxlint": "1.79.0",
     "oxlint-tsgolint": "7.0.2001",
     "typescript": "7.0.2"
-  }
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "repositoryDescription": "Private-source MangaHere extension repository for Paperback 0.9",
+  "repositoryName": "indigoxred MangaHere"
 }
