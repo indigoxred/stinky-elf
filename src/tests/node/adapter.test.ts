@@ -34,10 +34,21 @@ async function withoutGlobalUrl<T>(operation: () => Promise<T>): Promise<T> {
   }
 }
 
+async function withoutConsoleInfo<T>(operation: () => Promise<T>): Promise<T> {
+  const descriptor = Object.getOwnPropertyDescriptor(console, "info");
+  Object.defineProperty(console, "info", { configurable: true, value: undefined });
+  try {
+    return await operation();
+  } finally {
+    if (descriptor) Object.defineProperty(console, "info", descriptor);
+    else Reflect.deleteProperty(console, "info");
+  }
+}
+
 test("publishes the exact MangaHere source identity for restored libraries", () => {
   assert.equal(MangaHereConfig, NamedMangaHereConfig);
   assert.equal(MangaHereConfig.name, "MangaHere");
-  assert.equal(MangaHereConfig.version, "1.0.0-alpha.3");
+  assert.equal(MangaHereConfig.version, "1.0.0-alpha.4");
   assert.equal(MangaHereConfig.contentRating, ContentRating.MATURE);
   assert.deepEqual(MangaHereConfig.developers, [
     { name: "indigoxred", github: "https://github.com/indigoxred" },
@@ -152,7 +163,7 @@ test("maps title details and volume-qualified chapters onto the restored source"
   assert.equal(sourceManga.mangaInfo.contentRating, ContentRating.MATURE);
   assert.deepEqual(sourceManga.mangaInfo.tagGroups?.[0]?.tags, [
     { id: "Comedy", title: "Comedy" },
-    { id: "School Life", title: "School Life" },
+    { id: "Martial%20Arts", title: "Martial Arts" },
   ]);
 
   const chapterExtension = new MangaHereExtension({
@@ -286,4 +297,32 @@ test("opens a traditional chapter in the Paperback runtime without a global URL"
     "https://img.example/chapters/2.jpg",
     "https://img.example/chapters/3.jpg",
   ]);
+});
+
+test("opens a traditional chapter when the Paperback console has no info method", async () => {
+  const extension = new MangaHereExtension({
+    requestText: async (request: Request) => {
+      if (!request.url.includes("chapterfun.ashx")) {
+        return { status: 200, body: TRADITIONAL_READER_HTML };
+      }
+      const page = Number(/[?&]page=(\d+)/.exec(request.url)?.[1]);
+      return {
+        status: 200,
+        body: `pix='https://img.example/chapters/';pvalue=['${page}.jpg'];`,
+      };
+    },
+    sleep: async (_seconds: number) => {},
+  });
+
+  const details = await withoutConsoleInfo(() =>
+    extension.getChapterDetails({
+      chapterId: "c156",
+      sourceManga: sourceManga(),
+      langCode: "en",
+      chapNum: 156,
+    }),
+  );
+
+  assert.ok("pages" in details);
+  assert.equal(details.pages.length, 3);
 });

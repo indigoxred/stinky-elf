@@ -49,7 +49,7 @@ test("parses title metadata", () => {
     synopsis: "A sanitized synopsis.",
     author: "Example Author",
     status: "Completed",
-    genres: ["Comedy", "School Life"],
+    genres: ["Comedy", "Martial Arts"],
   });
 });
 

@@ -88,7 +88,7 @@ export class MangaHereExtension implements ExtensionImpl<typeof MangaHereConfig>
     this.sleep = options.sleep ?? ((seconds) => Application.sleep(seconds));
     this.initialiseNetwork = options.initialiseNetwork ?? (() => network.initialise());
     this.now = options.now ?? (() => Date.now());
-    this.log = options.log ?? ((event, details) => console.info(event, details));
+    this.log = options.log ?? ((event, details) => console.log(event, JSON.stringify(details)));
   }
 
   async initialise(): Promise<void> {
@@ -167,7 +167,10 @@ export class MangaHereExtension implements ExtensionImpl<typeof MangaHereConfig>
               {
                 id: "genres",
                 title: "Genres",
-                tags: parsed.genres.map((genre) => ({ id: genre, title: genre })),
+                tags: parsed.genres.map((genre) => ({
+                  id: encodeURIComponent(genre),
+                  title: genre,
+                })),
               },
             ]
           : [],

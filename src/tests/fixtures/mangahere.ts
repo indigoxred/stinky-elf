@@ -38,7 +38,7 @@ export const MANGA_DETAILS_HTML = `
     <span class="detail-info-right-title-font">Class No Bocchi</span>
     <p class="detail-info-right-say"><a>Example Author</a></p>
     <span class="detail-info-right-title-tip">Completed</span>
-    <div class="detail-info-right-tag-list"><a>Comedy</a><a>School Life</a></div>
+    <div class="detail-info-right-tag-list"><a>Comedy</a><a>Martial Arts</a></div>
   </section>
   <p class="fullcontent">A sanitized synopsis.</p>
 </body></html>`;
