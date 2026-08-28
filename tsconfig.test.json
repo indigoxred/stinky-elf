@@ -9,5 +9,6 @@
     "tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
     "types": ["node"]
   },
-  "include": ["src/MangaHere/**/*.ts", "src/tests/harness.ts", "src/tests/node/**/*.ts"]
+  "include": ["src/MangaHere/**/*.ts", "src/tests/harness.ts", "src/tests/node/**/*.ts"],
+  "exclude": []
 }
