@@ -17,6 +17,11 @@ requests returned HTTP 200 in 348 ms total, with no HTTP 403 or 429. The respons
 source order to page filename suffixes `001.jpg`, `002.jpg`, and `003.jpg` on MangaHere's image
 CDN. Only the small obfuscation responses were fetched.
 
+After the security review removed all WebView evaluation, the same live chapter was checked again
+through the strict inert-string decoder. It decoded a 16-character key, and a width-three probe
+returned three unique ordered pages with HTTP 200 in 184 ms. This second result is also a bounded
+connectivity observation, not a device benchmark.
+
 ## Interpretation
 
 - The live directory, search, title, chapter, and traditional-reader markup still matches the
@@ -24,6 +29,8 @@ CDN. Only the small obfuscation responses were fetched.
 - The live reader still requires a separate `chapterfun.ashx` resolver request per page.
 - Width-three concurrency works against the current endpoint and preserves the page indices in
   this bounded probe.
+- The current reader key can be decoded without executing the source document or arbitrary
+  JavaScript.
 - The 348 ms result is a connectivity check, not an end-to-end device benchmark.
 - Full-page completeness, duplicate detection, visual ordering, Cloudflare handoff, and restored
   Paperback 0.8 library attachment remain on-device acceptance checks.

@@ -34,10 +34,17 @@ jobs:
       - name: Build repository bundle
         run: pnpm run bundle
 
+      - name: Stage install artifacts only
+        run: |
+          mkdir -p release/MangaHere/static
+          cp bundles/index.html bundles/versioning.json release/
+          cp bundles/MangaHere/index.js bundles/MangaHere/info.json release/MangaHere/
+          cp bundles/MangaHere/static/icon.png release/MangaHere/static/
+
       - name: Publish compiled artifacts
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: bundles
+          publish_dir: release
           destination_dir: 0.9/stable

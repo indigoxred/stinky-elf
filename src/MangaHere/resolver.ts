@@ -20,6 +20,10 @@ export class PageResolutionError extends Error {
   }
 }
 
+export class DuplicatePageError extends Error {
+  override readonly name = "DuplicatePageError";
+}
+
 async function resolvePage(
   page: number,
   initialKey: string,
@@ -112,5 +116,9 @@ export async function resolveTraditionalPages(
 
   const unresolved = pages.flatMap((url, index) => (url ? [] : [index + 1]));
   if (unresolved.length > 0) throw new PageResolutionError(unresolved);
-  return pages as string[];
+  const resolved = pages as string[];
+  if (new Set(resolved).size !== resolved.length) {
+    throw new DuplicatePageError("Duplicate MangaHere page URL");
+  }
+  return resolved;
 }

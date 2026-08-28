@@ -126,3 +126,13 @@ test("rejects the whole chapter when one page remains unresolved", async () => {
       error instanceof PageResolutionError && error.message === "Unresolved MangaHere pages: 2",
   );
 });
+
+test("rejects the whole chapter when two page indices resolve to one URL", async () => {
+  const promise = resolveTraditionalPages(
+    CONFIG,
+    async (_page): Promise<PageFetchResult> => ({ status: 200, body: pageBody(1) }),
+    noSleep,
+  );
+
+  await assert.rejects(promise, /duplicate MangaHere page URL/i);
+});

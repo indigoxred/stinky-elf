@@ -37,9 +37,13 @@ MangaHere's traditional reader exposes each page URL through a separate `chapter
 request. This extension resolves up to three pages concurrently while retaining source order. It
 retries bounded transient failures, falls back to sequential requests after HTTP 403 or 429, and
 rejects the complete chapter if even one page remains unresolved. It never returns a partial page
-array.
+array or accepts duplicate page URLs.
 
 Bulk-reader chapters return their embedded image list directly.
+
+The reader key is decoded only from a strict concatenation of inert string literals. MangaHere's
+HTML and scripts are never executed in a WebView, and malformed or oversized packed scripts fail
+closed.
 
 ## Privacy and ownership
 

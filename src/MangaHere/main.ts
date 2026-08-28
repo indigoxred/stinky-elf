@@ -26,16 +26,15 @@ import {
   parsePageMetadata,
   parseReader,
 } from "./parsers.js";
+import { decodeKeyExpression } from "./packed.js";
 import MangaHereConfig from "./pbconfig.js";
 import { resolveTraditionalPages } from "./resolver.js";
 
 type RequestText = (request: Request) => Promise<MangaHereTextResponse>;
-type EvaluateKey = (html: string, baseUrl: string, expression: string) => Promise<string>;
 type Sleep = (seconds: number) => Promise<void>;
 
 export type MangaHereExtensionOptions = {
   requestText?: RequestText;
-  evaluateKey?: EvaluateKey;
   sleep?: Sleep;
   initialiseNetwork?: () => void;
   now?: () => number;
@@ -43,28 +42,6 @@ export type MangaHereExtensionOptions = {
 };
 
 const network = new MangaHereNetwork();
-
-async function evaluateReaderKey(
-  html: string,
-  baseUrl: string,
-  expression: string,
-): Promise<string> {
-  const execution = await Application.executeInWebView({
-    source: {
-      html,
-      baseUrl,
-      loadCSS: false,
-      loadImages: false,
-      userAgent: await Application.getDefaultUserAgent(),
-    },
-    inject: `(() => { const value = (${expression}); return typeof value === "string" ? value : String(value ?? ""); })()`,
-    storage: { cookies: [] },
-  });
-  if (typeof execution.result !== "string") {
-    throw new Error("MangaHere reader key did not evaluate to a string");
-  }
-  return execution.result;
-}
 
 function pageFromMetadata(metadata: Metadata | undefined): number {
   if (typeof metadata !== "object" || metadata === null || Array.isArray(metadata)) return 1;
@@ -101,7 +78,6 @@ function toDiscoverItem(item: ReturnType<typeof parseListings>[number]): Discove
 
 export class MangaHereExtension implements ExtensionImpl<typeof MangaHereConfig> {
   private readonly requestText: RequestText;
-  private readonly evaluateKey: EvaluateKey;
   private readonly sleep: Sleep;
   private readonly initialiseNetwork: () => void;
   private readonly now: () => number;
@@ -109,7 +85,6 @@ export class MangaHereExtension implements ExtensionImpl<typeof MangaHereConfig>
 
   constructor(options: MangaHereExtensionOptions = {}) {
     this.requestText = options.requestText ?? ((request) => network.requestText(request));
-    this.evaluateKey = options.evaluateKey ?? evaluateReaderKey;
     this.sleep = options.sleep ?? ((seconds) => Application.sleep(seconds));
     this.initialiseNetwork = options.initialiseNetwork ?? (() => network.initialise());
     this.now = options.now ?? (() => Date.now());
@@ -229,11 +204,7 @@ export class MangaHereExtension implements ExtensionImpl<typeof MangaHereConfig>
     let retryCount = 0;
     let throttleCount = 0;
     const attempts = new Map<number, number>();
-    const secretKey = await this.evaluateKey(
-      readerResponse.body,
-      canonicalUrl,
-      reader.keyExpression,
-    );
+    const secretKey = decodeKeyExpression(reader.keyExpression);
 
     try {
       const pages = await resolveTraditionalPages(

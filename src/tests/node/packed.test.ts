@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   PackedScriptError,
+  decodeKeyExpression,
   extractBulkImageUrls,
   extractKeyExpression,
   extractResolvedImageUrl,
@@ -42,8 +43,33 @@ test("extracts the secret-key expression without evaluating it", () => {
   assert.equal(extractKeyExpression(KEY_PACKED_SCRIPT), "'ab'+'cd'");
 });
 
+test("decodes only a concatenation of inert string literals", () => {
+  assert.equal(decodeKeyExpression("''+'b'+'7'+'e'+'3'"), "b7e3");
+  assert.throws(
+    () => decodeKeyExpression("'safe'+globalThis.fetch('https://example.com')"),
+    /safe string literal expression/i,
+  );
+});
+
 test("rejects malformed Dean-Edwards wrappers", () => {
   assert.throws(() => unpackDeanEdwards(MALFORMED_PACKED_SCRIPT), PackedScriptError);
+});
+
+test("rejects a packed script with an attacker-controlled keyword count", () => {
+  const oversized = String.raw`eval(function(p,a,c,k,e,d){return p;}('0',62,5000,'x'.split('|'),0,{}))`;
+  assert.throws(() => unpackDeanEdwards(oversized), /keyword count/i);
+});
+
+test("rejects duplicate bulk image URLs", () => {
+  assert.throws(
+    () =>
+      extractBulkImageUrls("newImgs=['https://img.example/1.jpg','https://img.example/1.jpg'];"),
+    /duplicate/i,
+  );
+});
+
+test("does not guess a key expression from unrelated script text", () => {
+  assert.throws(() => extractKeyExpression("const unrelated = 'value'; run();"), /secret-key/i);
 });
 
 test("rejects a response without a resolved image URL", () => {

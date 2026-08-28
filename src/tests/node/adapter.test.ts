@@ -145,14 +145,9 @@ test("returns bulk reader pages directly", async () => {
   );
 });
 
-test("evaluates the reader key once and resolves traditional page requests", async () => {
+test("decodes the inert reader key without loading untrusted HTML in a WebView", async () => {
   const resolverRequests: Request[] = [];
-  const evaluated: Array<{ expression: string; baseUrl: string }> = [];
   const extension = new MangaHereExtension({
-    evaluateKey: async (_html: string, baseUrl: string, expression: string) => {
-      evaluated.push({ expression, baseUrl });
-      return "abcd";
-    },
     requestText: async (request: Request) => {
       if (!request.url.includes("chapterfun.ashx")) {
         return { status: 200, body: TRADITIONAL_READER_HTML };
@@ -175,12 +170,6 @@ test("evaluates the reader key once and resolves traditional page requests", asy
     chapNum: 25,
   });
 
-  assert.deepEqual(evaluated, [
-    {
-      expression: "'ab'+'cd'",
-      baseUrl: "https://www.mangahere.cc/manga/class_no_bocchi/c025/1.html",
-    },
-  ]);
   assert.deepEqual(
     resolverRequests.map((request) => {
       const url = new URL(request.url);
