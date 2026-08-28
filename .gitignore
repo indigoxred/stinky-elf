@@ -2,6 +2,7 @@
 work/
 node_modules/
 bundles/
+.test-dist/
 *.log
 .DS_Store
 Thumbs.db

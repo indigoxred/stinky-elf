@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmit": false,
+    "outDir": ".test-dist",
+    "rootDir": "src",
+    "tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
+    "types": ["node"]
+  },
+  "include": ["src/MangaHere/**/*.ts", "src/tests/harness.ts", "src/tests/node/**/*.ts"]
+}
