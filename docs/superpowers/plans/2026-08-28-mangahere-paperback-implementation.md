@@ -83,7 +83,7 @@ Thumbs.db
 
 ```json
 {
-  "name": "mangahere-paperback",
+  "name": "stinky-elf",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -523,7 +523,7 @@ Commit: `feat: integrate MangaHere with Paperback 0.9`
 - Create: `docs/verification/device-test.md`
 
 **Interfaces:**
-- Produces: stable install path `https://indigoxred.github.io/mangahere-paperback/0.9/stable/` when GitHub Pages is available.
+- Produces: stable install path `https://indigoxred.github.io/stinky-elf/0.9/stable/` when GitHub Pages is available.
 
 - [ ] **Step 1: Generate and verify an original icon**
 
@@ -635,11 +635,11 @@ Commit: `test: verify MangaHere against the live site`
 - No new source files unless GitHub reports a Pages configuration requirement.
 
 **Interfaces:**
-- Produces: private repository `indigoxred/mangahere-paperback`, remote `origin`, public unlisted Pages install URL, and a development tag.
+- Produces: private repository `indigoxred/stinky-elf`, remote `origin`, public unlisted Pages install URL, and a development tag.
 
 - [ ] **Step 1: Create the repository under the authenticated `indigoxred` account**
 
-Create `mangahere-paperback` as private with no generated README, license, or `.gitignore`; verify owner and visibility before pushing.
+Create `stinky-elf` as private with no generated README, license, or `.gitignore`; verify owner and visibility before pushing.
 
 - [ ] **Step 2: Push local history**
 

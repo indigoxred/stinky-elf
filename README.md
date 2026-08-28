@@ -13,7 +13,7 @@ source reconnect when this 0.9 source is installed.
 The planned development repository URL is:
 
 ```text
-https://indigoxred.github.io/mangahere-paperback/0.9/stable/
+https://indigoxred.github.io/stinky-elf/0.9/stable/
 ```
 
 The URL will work only after the private repository's deployment workflow succeeds and GitHub
