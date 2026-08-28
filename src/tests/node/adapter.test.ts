@@ -19,7 +19,7 @@ import {
 test("publishes the exact MangaHere source identity for restored libraries", () => {
   assert.equal(MangaHereConfig, NamedMangaHereConfig);
   assert.equal(MangaHereConfig.name, "MangaHere");
-  assert.equal(MangaHereConfig.version, "1.0.0-alpha.1");
+  assert.equal(MangaHereConfig.version, "1.0.0-alpha.2");
   assert.equal(MangaHereConfig.contentRating, ContentRating.MATURE);
   assert.deepEqual(MangaHereConfig.developers, [
     { name: "indigoxred", github: "https://github.com/indigoxred" },
