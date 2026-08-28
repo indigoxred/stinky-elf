@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { URL as PaperbackURL } from "@paperback/types";
 
 import { BASE_URL } from "./constants.js";
 import { chapterIdFromHref, normalizeMangaId } from "./identifiers.js";
@@ -15,12 +16,12 @@ function absoluteUrl(value: string | undefined): string {
   if (!value?.trim()) return "";
 
   try {
-    const parsed = new URL(
-      value.trim().startsWith("//") ? `https:${value.trim()}` : value,
-      BASE_URL,
-    );
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
-    return parsed.href;
+    const candidate = value.trim().startsWith("//") ? `https:${value.trim()}` : value.trim();
+    const parsed = /^[A-Za-z][A-Za-z0-9+.-]*:/.test(candidate)
+      ? new PaperbackURL(candidate)
+      : new PaperbackURL(BASE_URL).update(candidate);
+    if (parsed.protocol !== "http" && parsed.protocol !== "https") return "";
+    return parsed.toString();
   } catch {
     return "";
   }
@@ -152,20 +153,20 @@ function scriptBodies(html: string): string[] {
 }
 
 function readerPageBase(chapterUrl: string): string {
-  let parsed: URL;
+  let parsed: PaperbackURL;
   try {
-    parsed = new URL(chapterUrl);
+    parsed = new PaperbackURL(chapterUrl);
   } catch {
     throw new MangaHereParseError("Reader chapter URL is invalid");
   }
-  if (!/\/1\.html$/i.test(parsed.pathname)) {
+  if (!/\/1\.html$/i.test(parsed.path)) {
     throw new MangaHereParseError("Reader chapter URL does not end in 1.html");
   }
 
-  parsed.pathname = parsed.pathname.replace(/\/1\.html$/i, "");
-  parsed.search = "";
-  parsed.hash = "";
-  return parsed.href;
+  parsed.setPath(parsed.path.replace(/\/1\.html$/i, ""));
+  parsed.setQueryItems(undefined);
+  parsed.fragment = undefined;
+  return parsed.toString();
 }
 
 export function parseReader(html: string, chapterUrl: string): ReaderConfig {

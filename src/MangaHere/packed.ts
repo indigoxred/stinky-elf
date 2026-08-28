@@ -1,3 +1,5 @@
+import { URL as PaperbackURL } from "@paperback/types";
+
 const PACKED_MARKER = "function(p,a,c,k,e,d)";
 const PACKED_ARGUMENTS =
   /\}\s*\(\s*'((?:\\.|[^'])*)'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*'((?:\\.|[^'])*)'\s*\.split\(\s*'\|'\s*\)/;
@@ -56,16 +58,16 @@ export function unpackDeanEdwards(source: string): string {
 
 function normalizeHttpImageUrl(value: string): string {
   const candidate = value.startsWith("//") ? `https:${value}` : value;
-  let parsed: URL;
+  let parsed: PaperbackURL;
   try {
-    parsed = new URL(candidate);
+    parsed = new PaperbackURL(candidate);
   } catch {
     throw new PackedScriptError("Reader did not produce a valid HTTP image URL");
   }
-  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+  if (parsed.protocol !== "https" && parsed.protocol !== "http") {
     throw new PackedScriptError("Reader did not produce an HTTP image URL");
   }
-  return parsed.href;
+  return parsed.toString();
 }
 
 export function extractBulkImageUrls(source: string): string[] {
@@ -96,7 +98,12 @@ export function extractResolvedImageUrl(source: string): string {
   }
 
   const normalizedBase = normalizeHttpImageUrl(base);
-  return normalizeHttpImageUrl(new URL(image, normalizedBase).href);
+  const parsedBase = new PaperbackURL(normalizedBase);
+  const directory = parsedBase.path.endsWith("/")
+    ? parsedBase.path
+    : parsedBase.path.replace(/[^/]*$/, "");
+  parsedBase.update(image.startsWith("/") ? image : `${directory}${image}`);
+  return normalizeHttpImageUrl(parsedBase.toString());
 }
 
 export function extractKeyExpression(source: string): string {

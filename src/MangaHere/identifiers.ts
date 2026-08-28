@@ -1,3 +1,5 @@
+import { URL as PaperbackURL } from "@paperback/types";
+
 import { BASE_URL, MANGAHERE_HOSTS } from "./constants.js";
 
 const SAFE_SEGMENT = /^[A-Za-z0-9._~-]+$/;
@@ -44,9 +46,9 @@ function normalizedPathSegments(input: string): string[] {
   let path: string;
 
   if (isAbsolute || isProtocolRelative) {
-    let parsed: URL;
+    let parsed: PaperbackURL;
     try {
-      parsed = new URL(isProtocolRelative ? `https:${trimmed}` : trimmed);
+      parsed = new PaperbackURL(isProtocolRelative ? `https:${trimmed}` : trimmed);
     } catch {
       throw new InvalidMangaHereIdError("Identifier is not a valid URL");
     }
@@ -54,10 +56,10 @@ function normalizedPathSegments(input: string): string[] {
     if (!MANGAHERE_HOSTS.has(parsed.hostname.toLowerCase())) {
       throw new InvalidMangaHereIdError("Identifier uses a foreign host");
     }
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    if (parsed.protocol !== "https" && parsed.protocol !== "http") {
       throw new InvalidMangaHereIdError("Identifier uses an unsupported protocol");
     }
-    path = parsed.pathname;
+    path = parsed.path;
   } else {
     path = relativePath(trimmed);
   }

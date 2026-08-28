@@ -2,7 +2,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { ContentRating, SourceIntents, type Request, type SourceManga } from "@paperback/types";
+import {
+  ContentRating,
+  DiscoverSectionType,
+  SourceIntents,
+  type Request,
+  type SourceManga,
+} from "@paperback/types";
 
 import { MangaHere, MangaHereExtension } from "../../MangaHere/main.js";
 import MangaHereConfig, {
@@ -11,15 +17,27 @@ import MangaHereConfig, {
 import {
   BULK_READER_HTML,
   CHAPTER_LIST_HTML,
+  DIRECTORY_HTML,
   MANGA_DETAILS_HTML,
   SEARCH_HTML,
   TRADITIONAL_READER_HTML,
 } from "../fixtures/mangahere.js";
 
+async function withoutGlobalUrl<T>(operation: () => Promise<T>): Promise<T> {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "URL");
+  Object.defineProperty(globalThis, "URL", { configurable: true, value: undefined });
+  try {
+    return await operation();
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, "URL", descriptor);
+    else Reflect.deleteProperty(globalThis, "URL");
+  }
+}
+
 test("publishes the exact MangaHere source identity for restored libraries", () => {
   assert.equal(MangaHereConfig, NamedMangaHereConfig);
   assert.equal(MangaHereConfig.name, "MangaHere");
-  assert.equal(MangaHereConfig.version, "1.0.0-alpha.2");
+  assert.equal(MangaHereConfig.version, "1.0.0-alpha.3");
   assert.equal(MangaHereConfig.contentRating, ContentRating.MATURE);
   assert.deepEqual(MangaHereConfig.developers, [
     { name: "indigoxred", github: "https://github.com/indigoxred" },
@@ -75,6 +93,49 @@ test("maps search results to legacy title ids and carries pagination", async () 
     ],
     metadata: { page: 2 },
   });
+});
+
+test("returns valid Popular and Latest cards without a global URL", async () => {
+  const requests: Request[] = [];
+  const extension = new MangaHereExtension({
+    requestText: async (request: Request) => {
+      requests.push(request);
+      return { status: 200, body: DIRECTORY_HTML };
+    },
+  });
+
+  const results = await withoutGlobalUrl(async () =>
+    Promise.all(
+      [
+        { id: "popular", title: "Popular" },
+        { id: "latest", title: "Latest Updates" },
+      ].map((section) =>
+        extension.getDiscoverSectionItems({
+          ...section,
+          type: DiscoverSectionType.simpleCarousel,
+        }),
+      ),
+    ),
+  );
+
+  const expectedItems = [
+    {
+      type: "simpleCarouselItem",
+      mangaId: "class_no_bocchi",
+      title: "Class No Bocchi",
+      imageUrl: "https://img.example/cover.jpg",
+      subtitle: "Comedy",
+      contentRating: ContentRating.MATURE,
+    },
+  ];
+  assert.deepEqual(
+    results.map((result) => result.items),
+    [expectedItems, expectedItems],
+  );
+  assert.deepEqual(
+    requests.map((request) => request.url),
+    ["https://www.mangahere.cc/directory/1.htm", "https://www.mangahere.cc/directory/1.htm?latest"],
+  );
 });
 
 test("maps title details and volume-qualified chapters onto the restored source", async () => {
@@ -192,4 +253,37 @@ test("decodes the inert reader key without loading untrusted HTML in a WebView",
     mangaId: "class_no_bocchi",
     pages: ["https://img.example/1.jpg", "https://img.example/2.jpg", "https://img.example/3.jpg"],
   });
+});
+
+test("opens a traditional chapter in the Paperback runtime without a global URL", async () => {
+  const extension = new MangaHereExtension({
+    requestText: async (request: Request) => {
+      if (!request.url.includes("chapterfun.ashx")) {
+        return { status: 200, body: TRADITIONAL_READER_HTML };
+      }
+      const page = Number(/[?&]page=(\d+)/.exec(request.url)?.[1]);
+      return {
+        status: 200,
+        body: `pix='https://img.example/chapters/';pvalue=['${page}.jpg'];`,
+      };
+    },
+    sleep: async (_seconds: number) => {},
+    log: (_event: string, _details: Record<string, number | string>) => {},
+  });
+
+  const details = await withoutGlobalUrl(() =>
+    extension.getChapterDetails({
+      chapterId: "c025",
+      sourceManga: sourceManga(),
+      langCode: "en",
+      chapNum: 25,
+    }),
+  );
+
+  assert.ok("pages" in details);
+  assert.deepEqual(details.pages, [
+    "https://img.example/chapters/1.jpg",
+    "https://img.example/chapters/2.jpg",
+    "https://img.example/chapters/3.jpg",
+  ]);
 });

@@ -2,6 +2,7 @@ import {
   BasicRateLimiter,
   CloudflareError,
   PaperbackInterceptor,
+  URL as PaperbackURL,
   type Request,
   type Response,
 } from "@paperback/types";
@@ -22,7 +23,7 @@ export type MangaHereTextResponse = {
 
 function isResolverRequest(url: string): boolean {
   try {
-    return new URL(url).pathname.toLowerCase().endsWith("/chapterfun.ashx");
+    return new PaperbackURL(url).path.toLowerCase().endsWith("/chapterfun.ashx");
   } catch {
     return false;
   }
