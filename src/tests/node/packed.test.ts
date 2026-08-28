@@ -39,6 +39,20 @@ test("extracts one resolved page URL from pix and pvalue", () => {
   assert.equal(extractResolvedImageUrl(PAGE_PACKED_SCRIPT), "https://img.example/003.jpg");
 });
 
+test("appends a slash-prefixed page name to the MangaHere CDN directory", () => {
+  const response = String.raw`
+    function dm5imagefun() {
+      var pix = "//zjcdn.mangahere.org/store/manga/11912/235.0/compressed";
+      var pvalue = ["/v001.jpg", "/v002.jpg"];
+    }
+  `;
+
+  assert.equal(
+    extractResolvedImageUrl(response),
+    "https://zjcdn.mangahere.org/store/manga/11912/235.0/compressed/v001.jpg",
+  );
+});
+
 test("extracts the secret-key expression without evaluating it", () => {
   assert.equal(extractKeyExpression(KEY_PACKED_SCRIPT), "'ab'+'cd'");
 });

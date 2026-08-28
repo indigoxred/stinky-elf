@@ -99,10 +99,9 @@ export function extractResolvedImageUrl(source: string): string {
 
   const normalizedBase = normalizeHttpImageUrl(base);
   const parsedBase = new PaperbackURL(normalizedBase);
-  const directory = parsedBase.path.endsWith("/")
-    ? parsedBase.path
-    : parsedBase.path.replace(/[^/]*$/, "");
-  parsedBase.update(image.startsWith("/") ? image : `${directory}${image}`);
+  const basePath = parsedBase.path.replace(/\/+$/, "");
+  const imagePath = image.replace(/^\/+/, "");
+  parsedBase.setPath(`${basePath}/${imagePath}`);
   return normalizeHttpImageUrl(parsedBase.toString());
 }
 
