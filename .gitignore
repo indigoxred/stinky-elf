@@ -1,0 +1,8 @@
+.worktrees/
+work/
+node_modules/
+bundles/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
