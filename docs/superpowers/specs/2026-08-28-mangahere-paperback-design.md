@@ -50,14 +50,16 @@ The normalizer must accept at least these equivalent forms:
 - Path-shaped title ID: `manga/series-name`
 - Absolute title URL: `https://www.mangahere.cc/manga/series-name/`
 - Legacy chapter ID: `c025`
+- Legacy volume-qualified chapter ID: `v01/c025`
 - Path-shaped chapter ID: `manga/series-name/c025`
+- Volume-qualified path-shaped chapter ID: `manga/series-name/v01/c025`
 - Absolute chapter URL: the equivalent MangaHere chapter URL
 
 Normalization removes the host, query string, fragment, redundant slashes, leading slash, optional `manga/` prefix, and trailing slash. It validates the remaining slug/path before constructing a request URL.
 
-Newly discovered titles and chapters will emit the stable legacy-compatible form: a title slug and chapter leaf ID. This avoids creating a second library identity for content already restored from Paperback 0.8. The request layer still accepts path-shaped forms so entries created by other 0.9 builds remain usable.
+Newly discovered titles and chapters will emit the stable legacy-compatible form: a title slug and the complete chapter path relative to that title, such as `c025` or `v01/c025`. This matches the 0.8 parser without discarding volume-qualified path segments and avoids creating a second library identity for restored content. The request layer still accepts title-prefixed path forms so entries created by other 0.9 builds remain usable.
 
-Chapter URL construction uses both `mangaId` and `chapterId`. A legacy chapter leaf is joined to the normalized title slug; a full chapter path is validated and used directly.
+Chapter URL construction uses both `mangaId` and `chapterId`. A legacy relative chapter path is joined to the normalized title slug; a title-prefixed full chapter path is validated and reduced to the same relative form before URL construction.
 
 ## 5. Chapter Page Data Flow
 
@@ -172,4 +174,3 @@ The first stable release is accepted only when:
 6. Configure the public, unlisted distribution endpoint.
 7. Publish a development build for owner device testing.
 8. Incorporate device findings, rerun verification, and publish the first stable release.
-
