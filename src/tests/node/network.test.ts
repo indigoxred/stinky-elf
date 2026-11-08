@@ -4,7 +4,7 @@ import test from "node:test";
 
 import { CloudflareError, type Request, type Response } from "@paperback/types";
 
-import { MangaHereInterceptor } from "../../MangaHere/network.js";
+import { MangaHereInterceptor, MangaHereNetwork } from "../../MangaHere/network.js";
 
 function response(headers: Record<string, string> = {}): Response {
   return {
@@ -14,6 +14,25 @@ function response(headers: Record<string, string> = {}): Response {
     cookies: [],
   };
 }
+
+test("registers the image-capable primary Paperback interceptor", () => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "Application");
+  const ids: string[] = [];
+  Object.defineProperty(globalThis, "Application", {
+    configurable: true,
+    value: {
+      Selector: () => "selector",
+      registerInterceptor: (id: string) => ids.push(id),
+    },
+  });
+  try {
+    new MangaHereNetwork().initialise();
+    assert.deepEqual(ids, ["main"]);
+  } finally {
+    if (previous) Object.defineProperty(globalThis, "Application", previous);
+    else Reflect.deleteProperty(globalThis, "Application");
+  }
+});
 
 test("adds browser headers and the adult cookie to MangaHere requests", async () => {
   let limited = 0;

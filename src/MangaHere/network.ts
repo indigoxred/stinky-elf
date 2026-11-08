@@ -85,7 +85,7 @@ export class MangaHereNetwork {
   private readonly interceptor: MangaHereInterceptor;
   private registered = false;
 
-  constructor(interceptorId = "MangaHere") {
+  constructor(interceptorId = "main") {
     this.interceptor = new MangaHereInterceptor(interceptorId);
   }
 
