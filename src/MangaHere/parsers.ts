@@ -21,6 +21,9 @@ function absoluteUrl(value: string | undefined): string {
       ? new PaperbackURL(candidate)
       : new PaperbackURL(BASE_URL).update(candidate);
     if (parsed.protocol !== "http" && parsed.protocol !== "https") return "";
+    if (parsed.protocol === "http" && parsed.hostname.toLowerCase() === "fmcdn.mangahere.com") {
+      parsed.setProtocol("https");
+    }
     return parsed.toString();
   } catch {
     return "";

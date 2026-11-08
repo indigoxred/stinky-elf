@@ -53,6 +53,22 @@ test("parses title metadata", () => {
   });
 });
 
+test("returns HTTPS cover URLs when MangaHere serves HTTP CDN links", () => {
+  const sourceUrl =
+    "http://fmcdn.mangahere.com/store/manga/11912/cover.jpg?token=example&ttl=1794211200";
+  const expectedUrl =
+    "https://fmcdn.mangahere.com/store/manga/11912/cover.jpg?token=example&ttl=1794211200";
+
+  const search = SEARCH_HTML.replace("//img.example/cover.jpg", sourceUrl.replaceAll("&", "&amp;"));
+  const details = MANGA_DETAILS_HTML.replace(
+    "//img.example/cover.jpg",
+    sourceUrl.replaceAll("&", "&amp;"),
+  );
+
+  assert.equal(parseListings(search, "search")[0]?.imageUrl, expectedUrl);
+  assert.equal(parseMangaDetails(details, "class_no_bocchi").thumbnailUrl, expectedUrl);
+});
+
 test("preserves complete legacy-relative chapter paths", () => {
   const chapters = parseChapters(CHAPTER_LIST_HTML, "class_no_bocchi");
   assert.deepEqual(
